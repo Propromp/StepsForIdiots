@@ -9,6 +9,9 @@ plugins {
 group = "net.propromp"
 version = "1.0-SNAPSHOT"
 
+java.sourceCompatibility = JavaVersion.VERSION_17
+java.targetCompatibility = JavaVersion.VERSION_17
+
 repositories {
     mavenCentral()
     maven("https://repo.spongepowered.org/maven")
