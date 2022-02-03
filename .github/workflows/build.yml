@@ -1,0 +1,55 @@
+name: build-and-release
+on:
+  push:
+    branches:
+      - main
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - name: checkout
+        uses: actions/checkout@v2
+      - name: setup java
+        uses: actions/setup-java@v1
+        with:
+          java-version: "11"
+          java-package: jdk
+      - name: cache gradle things
+        uses: actions/cache@v2
+        env:
+          cache-name: gradle-files
+        with:
+          path: ~/.gradle
+          key: ${{ runner.os }}-build-${{ env.cache-name }}-${{ hashFiles('build.gradle.kts') }}
+          restore-keys: ${{ runner.os }}-build-
+      - name: gradlew jar
+        run: sudo bash ./gradlew jar -Dfile.encoding=UTF-8
+      - name: get filename
+        id: get-filename
+        run: echo ::set-output name=file_name::$(ls -1 ./build/libs/)
+      - name: get version
+        id: get-version
+        uses: christian-draeger/read-properties@1.0.1
+        with:
+          path: ./gradle.properties
+          property: VERSION_NAME
+      - name: create release
+        id: create_release
+        uses: actions/create-release@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          tag_name: "${{ steps.get-version.outputs.version }}-${{ github.run_number }}"
+          release_name: "${{ steps.get-version.outputs.version }} ${{ github.event.head_commit.message }}"
+          body: ""
+          draft: false
+          prerelease: false
+      - name: upload asset
+        uses: actions/upload-release-asset@v1.0.1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_path: ./build/libs/${{ steps.get-filename.outputs.file_name }}
+          asset_name: ${{ steps.get-filename.outputs.file_name }}
+          asset_content_type: application/zip
