@@ -27,12 +27,11 @@ jobs:
       - name: get filename
         id: get-filename
         run: echo ::set-output name=file_name::$(ls -1 ./build/libs/)
-      - name: get version
+      - name: Get version
         id: get-version
-        uses: christian-draeger/read-properties@1.0.1
+        uses: thecodemonkey/action-get-gradle-version@master
         with:
-          path: ./gradle.properties
-          property: VERSION_NAME
+          file: build.gradle.kts
       - name: create release
         id: create_release
         uses: actions/create-release@v1
