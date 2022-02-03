@@ -1,3 +1,3 @@
 
-rootProject.name = "BlockParty"
+rootProject.name = "StepsForIdiots"
 
